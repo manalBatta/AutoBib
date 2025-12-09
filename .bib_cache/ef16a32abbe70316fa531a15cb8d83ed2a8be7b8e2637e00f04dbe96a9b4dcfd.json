@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "title": "Array programming with NumPy",
+    "author": [
+      "Charles R. Harris",
+      "K. Jarrod Millman",
+      "St\u00e9fan J. van der Walt",
+      "Ralf Gommers",
+      "Pauli Virtanen",
+      "David Cournapeau",
+      "Eric Wieser",
+      "Julian Taylor",
+      "Sebastian Berg",
+      "Nathaniel J. Smith",
+      "Robert Kern",
+      "Matti Picus",
+      "Stephan Hoyer",
+      "Marten H. van Kerkwijk",
+      "Matthew Brett",
+      "Allan Haldane",
+      "Jaime Fern\u00e1ndez del R\u00edo",
+      "Mark Wiebe",
+      "Pearu Peterson",
+      "Pierre G\u00e9rard-Marchant",
+      "Kevin Sheppard",
+      "Tyler Reddy",
+      "Warren Weckesser",
+      "Hameer Abbasi",
+      "Christoph Gohlke",
+      "Travis E. Oliphant"
+    ],
+    "year": 2020,
+    "doi": "10.1038/s41586-020-2649-2",
+    "URL": "https://doi.org/10.1038/s41586-020-2649-2",
+    "type": "article",
+    "container-title": "Nature",
+    "volume": "585",
+    "issue": "7825",
+    "page": "357-362"
+  },
+  "bibtex": "@article{auto2025,\n  title={ Array programming with NumPy },\n  author={ Charles R. Harris & K. Jarrod Millman & St\u00e9fan J. van der Walt & Ralf Gommers & Pauli Virtanen & David Cournapeau & Eric Wieser & Julian Taylor & Sebastian Berg & Nathaniel J. Smith & Robert Kern & Matti Picus & Stephan Hoyer & Marten H. van Kerkwijk & Matthew Brett & Allan Haldane & Jaime Fern\u00e1ndez del R\u00edo & Mark Wiebe & Pearu Peterson & Pierre G\u00e9rard-Marchant & Kevin Sheppard & Tyler Reddy & Warren Weckesser & Hameer Abbasi & Christoph Gohlke & Travis E. Oliphant },\n  year={ 2020 }\n}"
+}
