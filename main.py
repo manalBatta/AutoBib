@@ -1,20 +1,25 @@
 import sys
 import os
+
+import openai
+
+from config.settings import OPENAI_API_KEY, OPENAI_MODEL
 from utils.cache import load_from_cache, dump_to_cache
 from retriever.metadata_retriever import retrieve_metadata
 from services.LLM_formatter import format_as_bibtex
 from validation.bibtex_validation import validate_bibtex
-import openai
 from services.extractURL import extract_urls
 
-# Optional: set API key if you want real OpenAI calls
-# openai.api_key = os.getenv("OPENAI_API_KEY")
+# Configure OpenAI with key from settings (only needed when use_mock=False)
+openai.api_key = OPENAI_API_KEY
+
 
 
 def bibtex_from_url(url: str, use_mock: bool = True) -> str:
     # Check cache first
     cached = load_from_cache(url)
     if cached:
+        print("Cached bibtex found")
         return cached["bibtex"]
 
     # Retrieve metadata
@@ -31,7 +36,7 @@ def bibtex_from_url(url: str, use_mock: bool = True) -> str:
         else:
             fix_prompt = f"Fix syntax errors in this BibTeX entry:\n\n{bib}"
             fix = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=OPENAI_MODEL,
                 messages=[{"role": "user", "content": fix_prompt}],
                 temperature=0,
                 max_tokens=200,
@@ -41,7 +46,7 @@ def bibtex_from_url(url: str, use_mock: bool = True) -> str:
                 bib = fix
 
     # Save to cache
-    dump_to_cache(url, {"metadata": md, "bibtex": bib})
+    #dump_to_cache(url, {"metadata": md, "bibtex": bib})
     return bib
 
 if __name__ == "__main__":
@@ -49,12 +54,8 @@ if __name__ == "__main__":
 
     latex_text = r"""
     Normal URL in the text: https://doi.org/10.1038/s41586-020-2649-2.
-    Ignore this: \url{https://inside-url.com/page}.
-    Ignore href: \href{https://inside-link.com}{Click here}.
-    Ignore macro: \newcommand{\myurl}{https://macro-url.com}.
-    Another raw URL: www.testsite.org/path?ref=123.
-    Multi-line URL: https://longsite.com/very/long/
-    path/to/page
+    https://www.nature.com/articles/s41586-020-2649-2
+    https://arxiv.org/abs/2102.06714
     """
     print("Extracted URLs:")
     for u in extract_urls(latex_text):

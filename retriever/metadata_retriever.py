@@ -25,21 +25,23 @@ def retrieve_metadata(url: str) -> dict:
                 "issue": msg.get("issue"),
                 "page": msg.get("page")
             }
-
+        
     m = re.search(r'arxiv\.org/abs/([0-9\.]+)', url)
     if m:
         rec = fetch_arxiv(m.group(1))
         if rec:
             return rec
+        
 
     oa = fetch_unpaywall(url)
     if oa and oa.get("best_oa_location", {}).get("url"):
+        print("Unpaywall metadata found for ", url)
         pdf_url = oa["best_oa_location"]["url"]
         pdf_md = extract_pdf_metadata(pdf_url)
         if pdf_md:
             pdf_md.update({"URL": url, "type": "article"})
             return pdf_md
-
+    print("No metadata found for ", url)
     return {
         "title": "UNKNOWN",
         "author": ["UNKNOWN"],
