@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 import openai
 
@@ -49,25 +50,62 @@ def bibtex_from_url(url: str, use_mock: bool = True) -> str:
     #dump_to_cache(url, {"metadata": md, "bibtex": bib})
     return bib
 
+
+_BIB_KEY_RE = re.compile(r"@\w+\{([^,]+),")
+
+
+def _extract_bibtex_key(bibtex: str) -> str | None:
+    """Extract the BibTeX key from a BibTeX entry string."""
+    m = _BIB_KEY_RE.search(bibtex)
+    return m.group(1).strip() if m else None
+
 if __name__ == "__main__":
-    
-
-    latex_text = r"""
-    Normal URL in the text: https://doi.org/10.1038/s41586-020-2649-2.
-    https://www.nature.com/articles/s41586-020-2649-2
-    https://arxiv.org/abs/2102.06714
-    """
-    print("Extracted URLs:")
-    for u in extract_urls(latex_text):
-          print(" -", u)
-          print(bibtex_from_url(u, use_mock=True))
-
-
-
-   # print(extract_urls(sample_text))
-   
-    if len(sys.argv) == 1:
-        print("Usage: python main.py <url>")
+    # Expect a path to a .tex file as the first argument
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <path-to-file.tex>")
         sys.exit(1)
 
-    # Use mock=True to avoid OpenAI API calls and quota issues
+    tex_path = sys.argv[1]
+
+    if not os.path.isfile(tex_path):
+        print(f"Error: file not found: {tex_path}")
+        sys.exit(1)
+
+    with open(tex_path, "r", encoding="utf-8") as f:
+        latex_text = f.read()
+
+    # Derive output .bib file path from the .tex path
+    base, _ = os.path.splitext(tex_path)
+    bib_path = base + ".bib"
+
+    print("Extracted URLs:")
+    urls = extract_urls(latex_text)
+
+    if not urls:
+        print("No URLs found in the provided .tex file.")
+        sys.exit(0)
+
+    url_to_key: dict[str, str] = {}
+
+    # Write all BibTeX entries to a .bib file (overwrite on each run)
+    with open(bib_path, "w", encoding="utf-8") as bib_file:
+        for u in urls:
+            print(" -", u)
+            bib = bibtex_from_url(u, use_mock=True)
+            print(bib)
+            bib_file.write(bib)
+            bib_file.write("\n\n")
+
+            key = _extract_bibtex_key(bib)
+            if key:
+                url_to_key[u] = key
+
+    # Replace URLs in LaTeX text with ~\Cite{key}
+    for u, key in url_to_key.items():
+        latex_text = latex_text.replace(u, f"\\cite{{{key}}}")
+
+    with open(tex_path, "w", encoding="utf-8") as f:
+        f.write(latex_text)
+
+    print(f"\nAll BibTeX entries written to: {bib_path}")
+    print(f"Updated LaTeX file with \\Cite{{...}} commands: {tex_path}")

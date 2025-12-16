@@ -45,7 +45,15 @@ def _clean_url(url):
     }
     cleaned_query = {k: v for k, v in query.items() if k.lower() not in remove_keys}
     new_query = urlencode(cleaned_query, doseq=True)
-    cleaned = parsed._replace(query=new_query, fragment='')
+
+    # Normalize PDF-style URLs by trimming unnecessary suffixes
+    path = parsed.path
+    # Common pattern like "...v1.full.pdf" → "...v1"
+    path = re.sub(r'\.full\.pdf$', '', path, flags=re.IGNORECASE)
+    # Generic ".pdf" suffix → drop extension
+    path = re.sub(r'\.pdf$', '', path, flags=re.IGNORECASE)
+
+    cleaned = parsed._replace(path=path, query=new_query, fragment='')
     return urlunparse(cleaned)
 
 # ============================
@@ -64,7 +72,7 @@ def extract_urls(text):
     text = re.sub(r'\\[a-zA-Z]+\*?(?:\[[^\]]*\])?\{[^\}]*\}', '', text)
 
     # 3. Join broken URLs across lines
-    text = re.sub(r'(https?://[^\s<>"\'\]\)]*)\n([^\s<>"\'\]\)]*)', r'\1\2', text)
+    #text = re.sub(r'(https?://[^\s<>"\'\]\)]*)\n([^\s<>"\'\]\)]*)', r'\1\2', text)
 
     # 4. Regex to find raw URLs
     pattern = re.compile(r'(?i)(?:https?://|www\.)[^\s<>"\'\]\)]*', re.IGNORECASE)
