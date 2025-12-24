@@ -67,4 +67,6 @@ def _clean_doi(raw: str) -> str:
     raw = raw.strip()
     if "doi.org/" in raw:
         raw = raw.split("doi.org/")[-1]
+    # Remove any query parameters or fragments
+    raw = re.split(r'[?&]', raw)[0]
     return raw

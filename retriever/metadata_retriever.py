@@ -68,10 +68,4 @@ def retrieve_metadata(url: str) -> dict:
             pdf_md.update({"URL": url, "type": "article"})
             return pdf_md
     print("No metadata found for ", url)
-    return {
-        "title": "UNKNOWN",
-        "author": ["UNKNOWN"],
-        "year": None,
-        "URL": url,
-        "type": "misc"
-    }
+    return None

@@ -16,7 +16,7 @@ openai.api_key = OPENAI_API_KEY
 
 
 
-def bibtex_from_url(url: str, use_mock: bool = True) -> str:
+def bibtex_from_url(url: str, use_mock: bool = True) -> str | None:
     # Check cache first
     cached = load_from_cache(url)
     if cached:
@@ -25,6 +25,9 @@ def bibtex_from_url(url: str, use_mock: bool = True) -> str:
 
     # Retrieve metadata
     md = retrieve_metadata(url)
+    if md is None:
+        print("No metadata retrieved for", url)
+        return None
 
     # Format BibTeX
     bib = format_as_bibtex(md, use_mock=use_mock)
@@ -92,6 +95,9 @@ if __name__ == "__main__":
         for u in urls:
             print(" -", u)
             bib = bibtex_from_url(u, use_mock=True)
+            if bib is None:
+                print("Skipping URL due to failed metadata retrieval")
+                continue
             print(bib)
             bib_file.write(bib)
             bib_file.write("\n\n")
