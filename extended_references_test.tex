@@ -1,0 +1,115 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+
+\title{AutoBib Extended References Test: Diverse Citation Types}
+\author{AutoBib Test Suite}
+\date{2025}
+
+\begin{document}
+\maketitle
+\onehalfspacing
+13. Fundamentals of Software Engineering (FSEN Conference Book):
+15. \cite{Anon2019fundamenta}
+Opportunistic Reuse (Chapter from a Software Engineering book):
+\cite{Kotonya2008opportunis}
+
+\section{Books / Textbooks}
+1. Software Engineering: A Practitioner's Approach - McGraw-Hill:
+\cite{Pressman2014softwareen}
+
+2. The LaTeX Companion - Addison-Wesley:
+\cite{Mittelbach2004thelatexco}
+
+3. Modern Information Retrieval: The Concepts and Technology behind Search - Pearson:
+\cite{Croft2010searchengi}
+
+
+\section{Conference Proceedings}
+
+
+5. "Scholarly Document Processing: A Graph-based Approach for Citation Analysis" - IEEE ICDE:
+\cite{Wang2021lpelogarit}
+
+6. "Understanding Software Testing Challenges" - ACM SIGSOFT:
+\cite{Penta2020ontherelat}
+
+
+
+\section{Official Documentation}
+7. LaTeX BibTeX Documentation - CTAN:
+\cite{Team2024bibtexctan}
+
+8. Python Requests Library Documentation:
+\cite{requests.readthedocs.iorequestsht}
+
+9. NumPy Documentation - NumPy Developers:
+\cite{Developers2024numpydocum}
+
+\section{Open-Source Repositories}
+10. bibtexparser - Python BibTeX Parser Library:
+\cite{python-b2013pythonbibt}
+
+11. scholarly - Academic data extraction from Google Scholar:
+\cite{scholarl2014scholarly}
+
+12. crossrefapi - Python client for Crossref API:
+\cite{crossref2017crossrefap}
+
+\section{Technical Reports and Standards}
+13. IEEE Citation Reference Guide - IEEE:
+\cite{IEEEieeestanda}
+
+14. RFC 8259 - The JavaScript Object Notation (JSON) Data Interchange Format:
+\cite{Anon2017thejavascr}
+
+15. W3C HTML5 Specification:
+\cite{W3Chtmlstanda}
+
+
+\section{Software \& GitHub (The Right Way)}
+Direct GitHub links often fail in automation because they lack metadata. 
+However, major projects publish in JOSS (Journal of Open Source Software) to get a DOI.
+
+% 1. The "xarray" Python library (Hosted on GitHub, cited via JOSS DOI)
+% EXPECT: @article (because JOSS is a journal), but it represents Software.
+1. Xarray (Open Source Python Package):
+\cite{Honorato2016cazyparser}
+
+% 2. Tidyverse (R Software)
+2. Welcome to the Tidyverse:
+\cite{Wickham2019welcometot}
+
+% 3. Raw GitHub Link (Test Case)
+% EXPECT: This will likely be SKIPPED or fail, because it has no DOI.
+% This tests if your code gracefully handles non-academic URLs.
+3. Linux Kernel (Raw GitHub):
+\cite{linux2011linux}
+
+\section{Conference Proceedings (Official Sources)}
+Software Engineering research lives in conferences (ICSE, FSE, ASE).
+
+
+
+
+5. On the naturalness of code (The original idea):
+\cite{Hindle2012onthenatur}
+
+\section{Official Documentation & Standards}
+Citing technical standards (like JSON or HTTP) is crucial for technical papers.
+
+
+
+
+7. Hypertext Transfer Protocol Version 2 (HTTP/2):
+\cite{Belshe2015hypertextt}
+
+\section{Technical Reports (Government/Inst)}
+Reliable definitions often come from NIST or ISO.
+
+
+8. NIST Special Publication 800-145:
+\cite{Mell2011thenistdef}
+
+
+\end{document}

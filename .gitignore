@@ -29,3 +29,9 @@ pip-wheel-metadata/
 Thumbs.db
 .env
 
+# Generated BibTeX files (output from AutoBib)
+*.bib
+
+# AutoBib cache
+.bib_cache/
+
