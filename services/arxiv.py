@@ -2,7 +2,7 @@ import requests
 import feedparser
 
 def fetch_arxiv(arxiv_id: str):
-    r = requests.get(f"http://export.arxiv.org/api/query?id_list={arxiv_id}", timeout=8)
+    r = requests.get(f"http://export.arxiv.org/api/query?id_list={arxiv_id}", timeout=30)
     feed = feedparser.parse(r.text)
 
     if feed.entries:
