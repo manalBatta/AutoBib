@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoBib Presentation</title>
+
+    <!-- Fonts: Inter for clean, modern academic typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons: FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      :root {
+        --bg-color: #f8f9fa;
+        --text-color: #2c3e50;
+        --primary-color: #2563eb; /* Royal Blue */
+        --accent-color: #ef4444; /* For friction/attention */
+        --success-color: #10b981;
+        --card-bg: #ffffff;
+        --font-main: "Inter", sans-serif;
+        --font-code: "JetBrains Mono", monospace;
+        --transition-speed: 0.6s;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-main);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow: hidden; /* Prevent scrolling, handle via slides */
+        height: 100vh;
+        width: 100vw;
+      }
+
+      /* --- Navigation & Progress --- */
+      .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 6px;
+        background: var(--primary-color);
+        width: 0%;
+        z-index: 1000;
+        transition: width 0.3s ease;
+      }
+
+      .controls {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+      }
+
+      .nav-btn {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--text-color);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
+      }
+
+      .nav-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      .slide-number {
+        position: fixed;
+        bottom: 25px;
+        left: 20px;
+        font-size: 0.9rem;
+        color: #888;
+        font-weight: 600;
+      }
+
+      /* --- Slide Container --- */
+      main {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      section.slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.95) translateY(20px);
+        transition:
+          opacity var(--transition-speed) ease,
+          transform var(--transition-speed) ease,
+          visibility var(--transition-speed);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 80px;
+        text-align: center;
+      }
+
+      section.slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) translateY(0);
+        z-index: 1;
+      }
+
+      /* --- Typography & Layout --- */
+      h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        line-height: 1.1;
+        color: var(--text-color);
+        letter-spacing: -1px;
+      }
+
+      h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        color: var(--primary-color);
+      }
+
+      h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      p,
+      li {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #555;
+        margin-bottom: 1rem;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      /* --- Components --- */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: center;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        text-align: left;
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .highlight-box {
+        background: #eef2ff;
+        border-left: 5px solid var(--primary-color);
+        padding: 1.5rem;
+        text-align: left;
+        margin-top: 2rem;
+        font-weight: 600;
+        color: var(--text-color);
+      }
+
+      .code-block {
+        font-family: var(--font-code);
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: left;
+        font-size: 1rem;
+        position: relative;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      }
+
+      .code-label {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #334155;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        border-bottom-left-radius: 8px;
+        color: #94a3b8;
+      }
+
+      /* --- Diagram Styles --- */
+      .workflow-step {
+        background: white;
+        padding: 15px 25px;
+        border-radius: 50px;
+        border: 2px solid var(--primary-color);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+        margin-bottom: 1px;
+      }
+
+      .arrow-down {
+        font-size: 1.5rem;
+        color: #ccc;
+        margin: 5px 0;
+      }
+
+      .pipeline-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .pipeline-node {
+        width: 120px;
+        height: 120px;
+        background: white;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eee;
+        position: relative;
+        z-index: 2;
+      }
+
+      .pipeline-node i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+
+      .pipeline-node span {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .pipeline-connector {
+        height: 4px;
+        width: 50px;
+        background: #cbd5e1;
+        position: relative;
+      }
+
+      .pipeline-connector::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: -6px;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 8px solid #cbd5e1;
+      }
+
+      .hub-spoke {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hub {
+        width: 140px;
+        height: 140px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        z-index: 10;
+        font-weight: bold;
+        box-shadow: 0 0 30px rgba(37, 99, 235, 0.4);
+      }
+
+      .spoke {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Positioning spokes */
+      .spoke:nth-child(1) {
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .spoke:nth-child(2) {
+        top: 25%;
+        right: 0;
+        transform: translate(50%, -50%);
+      }
+      .spoke:nth-child(3) {
+        bottom: 25%;
+        right: 0;
+        transform: translate(50%, 50%);
+      }
+      .spoke:nth-child(4) {
+        bottom: 0;
+        left: 50%;
+        transform: translate(-50%, 50%);
+      }
+      .spoke:nth-child(5) {
+        bottom: 25%;
+        left: 0;
+        transform: translate(-50%, 50%);
+      }
+      .spoke:nth-child(6) {
+        top: 25%;
+        left: 0;
+        transform: translate(-50%, -50%);
+      }
+
+      /* --- Slide Specifics --- */
+
+      /* Slide 2: Problem */
+      .friction-path {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin: 40px 0;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0.7;
+      }
+      .step i {
+        font-size: 4rem;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+      .step-x {
+        color: var(--accent-color);
+        font-size: 2rem;
+        animation: pulse 2s infinite;
+      }
+
+      /* Slide 4: Core Idea */
+      .transformation-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 50px;
+        margin-top: 40px;
+        width: 100%;
+      }
+      .arrow-large {
+        font-size: 4rem;
+        color: var(--success-color);
+      }
+
+      /* Slide 5: Full Paper Transformation (UPDATED) */
+      .output-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        height: 100%;
+      }
+
+      .paper-preview {
+        text-align: left;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #000;
+        height: 210px; /* Reduced height to fit both blocks */
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .paper-preview-footer {
+          margin-top: auto;
+          padding-top: 10px;
+          border-top: 1px dashed #eee;
+          font-size: 0.7rem;
+          color: #999;
+          text-align: right;
+          font-family: sans-serif;
+      }
+
+      .paper-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        text-align: center;
+      }
+      .paper-text span {
+        background: #ffcccc;
+        color: #d00;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.85em;
+        word-break: break-all;
+      }
+      .paper-text .clean-cite {
+        background: #fff3cd;
+        color: #856404;
+        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+
+
+      #full-paper{
+        grid-template-columns: 1fr 0.5fr 1fr ;
+      }
+      
+
+      /* Slide 6: AI */
+      .ai-visual {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 40px;
+      }
+      .magic-box {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+      }
+
+      /* Slide 9: Results */
+      .metric-big {
+        font-size: 5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        line-height: 1;
+        margin-bottom: 10px;
+      }
+      .metric-label {
+        font-size: 1.2rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .comparison-bar-container {
+        width: 100%;
+        max-width: 600px;
+        margin-top: 40px;
+      }
+      .bar-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      .bar-bg {
+        background: #e2e8f0;
+        height: 30px;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+      }
+      .bar-fill {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9rem;
+        transition: width 1.5s ease-out;
+        width: 0; /* JS will animate */
+      }
+      .bar-fill.manual {
+        background: var(--accent-color);
+      }
+      .bar-fill.autobib {
+        background: var(--success-color);
+        color: #1e293b;
+      }
+
+
+      /* Slide 11: Results Table (UPDATED) */
+      .academic-table {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        border-collapse: separate; 
+        border-spacing: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+      }
+      
+      .academic-table thead {
+        background-color: var(--primary-color);
+      }
+      
+      .academic-table th {
+        color: white;
+        font-weight: 600;
+        padding: 1.2rem;
+        text-align: left;
+        font-size: 1.1rem;
+      }
+      
+      .academic-table th:first-child {
+        border-top-left-radius: 12px;
+      }
+      
+      .academic-table th:last-child {
+        border-top-right-radius: 12px;
+      }
+
+      .academic-table td {
+        padding: 1.2rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 1rem;
+        text-align: left;
+        color: #334155;
+      }
+      
+      .academic-table tr:last-child td {
+        border-bottom: none;
+      }
+      
+      .academic-table tr:nth-child(even) {
+        background-color: #f8fafc;
+      }
+      
+      .table-highlight {
+        color: var(--success-color);
+        font-weight: 700;
+        font-family: var(--font-code);
+      }
+      
+      .metric-summary {
+          display: flex;
+          justify-content: center;
+          gap: 40px;
+          margin-bottom: 2rem;
+      }
+      
+      .metric-item {
+          text-align: center;
+      }
+      
+      .metric-number {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: var(--primary-color);
+          line-height: 1;
+      }
+      
+      .metric-desc {
+          font-size: 0.9rem;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-top: 5px;
+      }
+      /* Animations */
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        h1 {
+          font-size: 2.5rem;
+        }
+        h2 {
+          font-size: 2rem;
+        }
+        .grid-2,
+        .grid-3,
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+        .friction-path {
+          gap: 10px;
+        }
+        .transformation-box {
+          flex-direction: column;
+          gap: 20px;
+        }
+        .arrow-large {
+          transform: rotate(90deg);
+        }
+        .pipeline-container {
+          flex-direction: column;
+        }
+        .pipeline-connector {
+          width: 4px;
+          height: 50px;
+        }
+        .pipeline-connector::after {
+          top: auto;
+          bottom: 0;
+          left: -6px;
+          transform: rotate(90deg);
+          border-left-color: transparent;
+          border-right-color: #cbd5e1;
+        }
+        .hub-spoke {
+          transform: scale(0.7);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Slide 1: Title -->
+    <section class="slide active" id="slide1">
+      <div class="container">
+        <div
+          style="
+            margin-bottom: 2rem;
+            font-size: 4rem;
+            color: var(--primary-color);
+          "
+        >
+          <i class="fa-solid fa-brackets-curly"></i>
+        </div>
+        <h1>AutoBib</h1>
+        <h3
+          style="
+            font-weight: 400;
+            color: #555;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+          "
+        >
+          Automated Citation and BibTeX Generation from Raw URLs in LaTeX Source
+          Files
+        </h3>
+
+        <div
+          style="
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+          "
+        >
+          <span class="card" style="padding: 10px 20px; margin: 0"
+            >Haya Samaana</span
+          >
+          <span class="card" style="padding: 10px 20px; margin: 0"
+            >Manal Batta</span
+          >
+          <span class="card" style="padding: 10px 20px; margin: 0"
+            >Batoul Basalat</span
+          >
+          <span class="card" style="padding: 10px 20px; margin: 0"
+            >Toqa Ghanem</span
+          >
+        </div>
+
+        <div
+          style="
+            margin-top: 3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+          "
+        >
+          An-Najah National University
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: The Problem -->
+    <section class="slide" id="slide2">
+      <div class="container">
+        <h2>Research Writing Should Not Be Interrupted</h2>
+
+        <div class="friction-path">
+          <div class="step">
+            <i class="fa-solid fa-pen"></i>
+            <span>Writing</span>
+          </div>
+          <div class="step-x"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="step">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Search</span>
+          </div>
+          <div class="step-x"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="step">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Citation Tool</span>
+          </div>
+          <div class="step-x"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="step">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copy BibTeX</span>
+          </div>
+          <div class="step-x"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="step">
+            <i class="fa-solid fa-pen"></i>
+            <span>Back to Writing</span>
+          </div>
+        </div>
+
+        <div
+          class="highlight-box"
+          style="text-align: center; max-width: 800px; margin: 0 auto"
+        >
+          Researchers lose focus because citation management interrupts the
+          creative writing flow.
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: Research Gap -->
+    <section class="slide" id="slide3">
+      <div class="container">
+        <h2>Existing Tools Still Have Friction</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-icon"><i class="fa-solid fa-book-open"></i></div>
+            <h3>Zotero / Mendeley</h3>
+            <ul>
+                <li><i class="fa-solid fa-xmark" style="color:var(--accent-color); margin-right:8px;"></i>Requires library management</li>
+                <li><i class="fa-solid fa-xmark" style="color:var(--accent-color); margin-right:8px;"></i>Interrupts writing flow</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-icon"><i class="fa-solid fa-link"></i></div>
+            <h3>DOI / url2bib</h3>
+            <ul>
+                <li><i class="fa-solid fa-xmark" style="color:var(--accent-color); margin-right:8px;"></i>One citation at a time</li>
+                <li><i class="fa-solid fa-xmark" style="color:var(--accent-color); margin-right:8px;"></i>No automatic LaTeX rewriting</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 3rem">
+          <h3 style="font-size: 2.2rem; color: var(--text-color)">
+            No existing tool supports a seamless
+            <span style="color: var(--primary-color)"
+              >URL-first LaTeX workflow.</span
+            >
+          </h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Core Idea -->
+    <section class="slide" id="slide4">
+      <div class="container">
+        <h2>URL-First Writing Workflow</h2>
+        <!--         <p>Paste URLs naturally. Convert automatically.</p>
+ -->
+        <div class="transformation-box">
+          <!-- Left Side -->
+          <div style="text-align: center">
+            <div class="code-block" style="min-width: 300px">
+              <span class="code-label">LaTeX Source (Draft)</span>
+              ... recent studies show
+              <span style="color: #60a5fa"
+                >https://arxiv.org/abs/2301.07041</span
+              >
+              supports this claim ...
+            </div>
+            <small style="color: #888">Raw URL</small>
+          </div>
+
+          <div class="arrow-large">
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+
+          <!-- Right Side -->
+          <div style="text-align: center">
+            <div class="code-block" style="min-width: 300px">
+              <span class="code-label">LaTeX Source (Final)</span>
+              ... recent studies show
+              <span style="color: #fbbf24">\cite{smith2023autobib}</span>
+              supports this claim ...
+            </div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
+              "
+            >
+              <i
+                class="fa-solid fa-file-code"
+                style="color: var(--success-color); font-size: 1.5rem"
+              ></i>
+              <small style="color: var(--success-color); font-weight: bold"
+                >.bib file generated</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+      <!-- Slide 5: Full Paper Transformation -->
+    <section class="slide" id="slide5">
+        <div class="container">
+            <h2>One Click Transformation</h2>
+            <p style="margin-bottom: 20px; color: #666;">Real Data: Vaswani et al. (ArXiv), PyTorch (GitHub), Shaw et al. (ACM)</p>
+            
+            <div class="grid-2" id="full-paper">
+                <!-- LEFT: BEFORE -->
+                <div style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                    <h4 style="margin-bottom: 10px; color: var(--accent-color);">Input: draft.tex</h4>
+                    <div class="paper-preview" style="height: 350px;">
+                        <div class="paper-title">A Novel Approach to NLP</div>
+                        <div class="paper-text">
+                            Recent advances in deep learning <span>https://arxiv.org/abs/1706.03762</span> have revolutionized the field. Specifically, the attention mechanism allows models to focus on different parts of the input sequence simultaneously. This is further supported by findings in <span>https://github.com/pytorch/pytorch</span> regarding efficient implementation.<br><br>
+                            However, challenges remain in long-sequence modeling. As noted by <span>https://dl.acm.org/doi/10.1145/3292500.3330652</span>, memory constraints limit the scalability of transformer architectures...
+                        </div>
+                        <div class="paper-preview-footer">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Contains raw URLs
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CENTER: ARROW -->
+                <div class="arrow-large" style="margin: auto;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <div style="font-size: 1rem; color: var(--success-color); font-weight: bold; margin-top: 10px;">One Click</div>
+                </div>
+
+                <!-- RIGHT: AFTER (STACKED) -->
+                <div class="output-stack">
+                    <!-- Output 1: Updated .tex -->
+                    <div style="text-align: center;">
+                        <h4 style="margin-bottom: 5px; color: var(--success-color);">Output: final.tex</h4>
+                        <div class="paper-preview" style="height: 150px;">
+                            <div class="paper-text" style="font-size: 0.85rem;">
+                                Recent advances in deep learning <span class="clean-cite">\cite{vaswani2017attention}</span>... supported by <span class="clean-cite">\cite{pytorch2019}</span>... noted by <span class="clean-cite">\cite{shaw2019reformer}</span>, memory constraints limit...
+                            </div>
+                            <div class="paper-preview-footer">
+                                <i class="fa-solid fa-check-circle" style="color:var(--success-color)"></i> Formatted citations
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output 2: Generated .bib -->
+                    <div style="text-align: center;">
+                        <h4 style="margin-bottom: 5px; color: var(--primary-color);">Output: references.bib</h4>
+                        <div class="code-block" style="height: 150px; overflow-y: auto; font-size: 0.65rem;">
+                            <span class="code-label">references.bib</span>
+                            @article{vaswani2017attention,<br>
+                            &nbsp;&nbsp;title={Attention Is All You Need},<br>
+                            &nbsp;&nbsp;author={Vaswani, Ashish and others},<br>
+                            &nbsp;&nbsp;journal={NIPS},<br>
+                            &nbsp;&nbsp;year={2017}<br>
+                            }<br><br>
+                            
+                            @misc{pytorch2019,<br>
+                            &nbsp;&nbsp;title={PyTorch: An Imperative Style...},<br>
+                            &nbsp;&nbsp;author={Paszke, Adam and others},<br>
+                            &nbsp;&nbsp;year={2019}<br>
+                            }<br><br>
+                            
+                            @inproceedings{shaw2019reformer,<br>
+                            &nbsp;&nbsp;title={Reformer: The Efficient Transformer},<br>
+                            &nbsp;&nbsp;author={Shaw, Peter and others},<br>
+                            &nbsp;&nbsp;booktitle={ICLR},<br>
+                            &nbsp;&nbsp;year={2020}<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Full System Workflow -->
+    <section class="slide" id="slide6">
+      <div class="container">
+        <h2>How AutoBib Works</h2>
+
+        <div class="pipeline-container" style="flex-direction: column">
+          <div class="workflow-step">
+            <i class="fa-regular fa-file-code"></i> Input .tex File
+          </div>
+          <div class="arrow-down"><i class="fa-solid fa-chevron-down"></i></div>
+
+          <div
+            class="workflow-step"
+            style="background: #f1f5f9; border-color: #cbd5e1; color: #64748b"
+          >
+            <i class="fa-solid fa-filter"></i> Extract & Clean URLs
+          </div>
+          <div class="arrow-down"><i class="fa-solid fa-chevron-down"></i></div>
+
+          <div
+            class="workflow-step"
+            style="background: #f1f5f9; border-color: #cbd5e1; color: #64748b"
+          >
+            <i class="fa-solid fa-database"></i> Metadata Retrieval Pipeline
+          </div>
+          <div class="arrow-down"><i class="fa-solid fa-chevron-down"></i></div>
+
+          <div
+            class="workflow-step"
+            style="border-color: #8b5cf6; color: #7c3aed"
+          >
+            <i class="fa-solid fa-wand-magic-sparkles"></i> LLM-Based BibTeX
+            Formatting
+          </div>
+          <div class="arrow-down"><i class="fa-solid fa-chevron-down"></i></div>
+
+          <div class="workflow-step">
+            <i class="fa-solid fa-check-double"></i> Validation & Rewrite
+          </div>
+          <div class="arrow-down"><i class="fa-solid fa-chevron-down"></i></div>
+
+          <div style="display: flex; gap: 20px; margin-top: 20px">
+            <div class="workflow-step" style="margin: 0">
+              <i class="fa-regular fa-file-lines"></i> Updated .tex
+            </div>
+            <div class="workflow-step" style="margin: 0">
+              <i class="fa-solid fa-book"></i> Generated .bib
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- May remove slide 6 -->
+    <!-- Slide 6: The AI Component -->
+    <section class="slide" id="slide7">
+      <div class="container">
+        <h2>How AI Is Used in AutoBib</h2>
+        <p>
+          <strong>Important:</strong> Metadata retrieval is deterministic; AI is
+          used only for formatting and normalization.
+        </p>
+
+        <div class="ai-visual">
+          <!-- Input -->
+          <div
+            class="code-block"
+            style="
+              width: 250px;
+              min-height: 200px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+            "
+          >
+            <div style="color: #94a3b8; margin-bottom: 10px">
+              Metadata (JSON)
+            </div>
+            {<br />
+            &nbsp;&nbsp;title: "...",<br />
+            &nbsp;&nbsp;authors: [...],<br />
+            &nbsp;&nbsp;year: 2025<br />
+            }
+          </div>
+
+          <!-- AI Process -->
+          <div class="magic-box">
+            <i
+              class="fa-solid fa-brain"
+              style="font-size: 3rem; margin-bottom: 10px"
+            ></i>
+            <span style="font-weight: bold; font-size: 1.2rem">LLM Model</span>
+            <span style="font-size: 0.8rem; opacity: 0.9; margin-top: 5px"
+              >Normalize & Format</span
+            >
+          </div>
+
+          <!-- Output -->
+          <div
+            class="code-block"
+            style="
+              width: 250px;
+              min-height: 200px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+            "
+          >
+            <div style="color: #94a3b8; margin-bottom: 10px">
+              Structured BibTeX
+            </div>
+            @article{key,<br />
+            &nbsp;&nbsp;title = {...},<br />
+            &nbsp;&nbsp;author = {...},<br />
+            &nbsp;&nbsp;year = {...}<br />
+            }
+          </div>
+        </div>
+
+        <div style="margin-top: 2rem; color: #64748b; font-style: italic">
+          The AI ensures consistent, valid BibTeX syntax from messy metadata.
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Slide 8: Multi-Source Pipeline (UPDATED WITH IMAGE) -->
+    <section class="slide" id="slide8">
+      <div class="container">
+        <h2>Why AutoBib Is More Reliable</h2>
+        <h3
+          style="
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: #64748b;
+            margin-bottom: 2rem;
+          "
+        >
+          Prioritized Metadata Retrieval Pipeline
+        </h3>
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+          "
+        >
+          <img
+            src="https://z-cdn-media.chatglm.cn/files/6f62a6d2-833f-4f07-9071-bfc018c0586e.png?auth_key=1878918654-d4b281076e24472c949a5d2e2b661af3-0-50de04d826cc3137b2749026c4582d35"
+            alt="Figure 2: Prioritized metadata retrieval pipeline"
+            style="
+              max-width: 90%;
+              max-height: 60vh;
+              border-radius: 12px;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+              object-fit: contain;
+            "
+          />
+          <div class="hub-spoke">
+            <div class="hub">Unified<br />Metadata</div>
+            <div class="spoke"><i class="fa-brands fa-github"></i> GitHub</div>
+            <div class="spoke"><i class="fa-solid fa-book"></i> Books</div>
+            <div class="spoke">
+              <i class="fa-solid fa-file-contract"></i> RFC/Std
+            </div>
+            <div class="spoke"><i class="fa-solid fa-scroll"></i> Crossref</div>
+            <div class="spoke"><i class="fa-solid fa-atom"></i> arXiv</div>
+          </div>
+        </div>
+        </div>
+
+        <p style="color: var(--text-color)">
+                AutoBib does not rely on a single provider.
+        </p>
+      </div>
+    </section>
+
+    <!-- Slide 9: Smart Features -->
+    <section class="slide" id="slide9">
+      <div class="container">
+        <h2>Designed for Real Research Workflows</h2>
+
+        <div class="grid-4">
+          <div class="card" style="text-align: center">
+            <i class="fa-solid fa-broom card-icon"></i>
+            <h4>Cleaning</h4>
+            <p style="font-size: 0.9rem">
+              Removes tracking params & PDF suffixes.
+            </p>
+          </div>
+          <div class="card" style="text-align: center">
+            <i class="fa-solid fa-clone card-icon"></i>
+            <h4>Deduping</h4>
+            <p style="font-size: 0.9rem">Identical URLs processed once.</p>
+          </div>
+          <div class="card" style="text-align: center">
+            <i class="fa-solid fa-shield-halved card-icon"></i>
+            <h4>Validation</h4>
+            <p style="font-size: 0.9rem">Checks BibTeX syntax integrity.</p>
+          </div>
+          <div class="card" style="text-align: center">
+            <i class="fa-solid fa-rotate-left card-icon"></i>
+            <h4>Safe Fallback</h4>
+            <p style="font-size: 0.9rem">Keeps URL if retrieval fails.</p>
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: 3rem;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
+            text-align: left;
+          "
+        >
+          <span style="color: #ef4444; text-decoration: line-through"
+            >https://example.com/paper?utm_source=google.pdf</span
+          >
+          <div style="text-align: center; margin: 10px 0">
+            <i class="fa-solid fa-arrow-down"></i>
+          </div>
+          <span style="color: var(--success-color); font-weight: bold"
+            >https://example.com/paper</span
+          >
+        </div>
+      </div>
+    </section>
+
+   
+
+     <!-- Slide 11: Results (UPDATED WITH TABLE) -->
+    <section class="slide" id="slide10">
+      <div class="container">
+        <h2>Experimental Results</h2>
+        <p style="margin-bottom: 1.5rem; color: #64748b;">Evaluated on a corpus of 90+ URLs across academic papers, GitHub repositories, books, and technical standards.</p>
+
+        <!-- Highlight Metrics -->
+        <div class="metric-summary">
+            <div class="metric-item">
+                <div class="metric-number">100%</div>
+                <div class="metric-desc">Coverage</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">0.90s</div>
+                <div class="metric-desc">Avg. Time</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">100x</div>
+                <div class="metric-desc">Faster</div>
+            </div>
+        </div>
+
+        <!-- Academic Table -->
+        <table class="academic-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Manual Approach</th>
+                    <th>AutoBib</th>
+                    <th>Improvement</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Total Time</strong><br><span style="font-size:0.8rem; color:#888;">(for 33 URLs)</span></td>
+                    <td>~33 minutes</td>
+                    <td class="table-highlight">~30 seconds</td>
+                    <td class="table-highlight">~100x Faster</td>
+                </tr>
+                <tr>
+                    <td><strong>Avg. Time / Citation</strong></td>
+                    <td>~60 seconds</td>
+                    <td class="table-highlight">0.90 seconds</td>
+                    <td class="table-highlight">Significant</td>
+                </tr>
+                <tr>
+                    <td><strong>Citation Coverage</strong><br><span style="font-size:0.8rem; color:#888;">(Known Sources)</span></td>
+                    <td>N/A</td>
+                    <td class="table-highlight">100%</td>
+                    <td class="table-highlight">High Reliability</td>
+                </tr>
+                <tr>
+                    <td><strong>BibTeX Validity</strong></td>
+                    <td>Variable (Human Error)</td>
+                    <td class="table-highlight">100% Validated</td>
+                    <td class="table-highlight">No Syntax Errors</td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Slide 12: Conclusion -->
+    <section class="slide" id="slide11">
+      <div class="container">
+        <h1 style="font-size: 4rem; margin-bottom: 3rem">
+          Write Naturally.<br />Cite Automatically.
+        </h1>
+
+        <div class="grid-2" style="text-align: left">
+          <div>
+            <h3 style="color: var(--primary-color)">Future Work</h3>
+            <ul style="list-style: none; padding-left: 0">
+              <li style="margin-bottom: 15px">
+                <i
+                  class="fa-solid fa-check"
+                  style="color: var(--success-color); margin-right: 10px"
+                ></i>
+                Overleaf Integration
+              </li>
+              <li style="margin-bottom: 15px">
+                <i
+                  class="fa-solid fa-check"
+                  style="color: var(--success-color); margin-right: 10px"
+                ></i>
+                VS Code Extension
+              </li>
+              <li style="margin-bottom: 15px">
+                <i
+                  class="fa-solid fa-check"
+                  style="color: var(--success-color); margin-right: 10px"
+                ></i>
+                Persistent Cache
+              </li>
+              <li style="margin-bottom: 15px">
+                <i
+                  class="fa-solid fa-check"
+                  style="color: var(--success-color); margin-right: 10px"
+                ></i>
+                Testing with different AI models
+              </li>
+            </ul>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+            "
+          >
+            <i
+              class="fa-regular fa-comments"
+              style="font-size: 5rem; color: #cbd5e1"
+            ></i>
+            <h2 style="margin-top: 20px; color: #64748b">Questions?</h2>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="nav-btn" id="prevBtn" aria-label="Previous Slide">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="nav-btn" id="nextBtn" aria-label="Next Slide">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="slide-number">
+      <span id="currentSlide">1</span> / <span id="totalSlides">10</span>
+    </div>
+
+    <script>
+      // State
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const currentSlideEl = document.getElementById("currentSlide");
+      const totalSlidesEl = document.getElementById("totalSlides");
+
+      // Initialize Counters
+      let countersAnimated = false;
+
+      // Set total slides number
+      totalSlidesEl.textContent = totalSlides;
+
+      // Functions
+      function updateSlides() {
+        slides.forEach((slide, index) => {
+          slide.classList.remove("active");
+          if (index === currentSlide) {
+            slide.classList.add("active");
+          }
+        });
+
+        // Update Progress Bar
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        // Update Slide Number
+        currentSlideEl.textContent = currentSlide + 1;
+
+        // Trigger animations if on Results slide (Slide 9, index 8)
+        if (currentSlide === 8) {
+          if (!countersAnimated) {
+            animateCounters();
+            animateBars();
+            countersAnimated = true;
+          }
+        }
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateSlides();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlides();
+        }
+      }
+
+      function animateCounters() {
+        // Coverage 0 to 100
+        let cov = 0;
+        const covEl = document.getElementById("metric-coverage");
+        const covInterval = setInterval(() => {
+          cov++;
+          covEl.textContent = `${cov}%`;
+          if (cov >= 100) clearInterval(covInterval);
+        }, 20);
+
+        // Time 0.00 to 0.90
+        let time = 0.0;
+        const timeEl = document.getElementById("metric-time");
+        const timeInterval = setInterval(() => {
+          time += 0.01;
+          timeEl.textContent = time.toFixed(2);
+          if (time >= 0.9) clearInterval(timeInterval);
+        }, 20);
+      }
+
+      function animateBars() {
+        setTimeout(() => {
+          const autobibBar = document.querySelector(".bar-fill.autobib");
+          const targetWidth = autobibBar.getAttribute("data-width");
+          autobibBar.style.width = targetWidth;
+        }, 500);
+      }
+
+      // Event Listeners
+      document.getElementById("nextBtn").addEventListener("click", nextSlide);
+      document.getElementById("prevBtn").addEventListener("click", prevSlide);
+
+      // Keyboard Navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          prevSlide();
+        }
+      });
+
+      // Initialize
+      updateSlides();
+    </script>
+  </body>
+</html>
