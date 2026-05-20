@@ -5,7 +5,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from core import NoUrlsFoundError, process_latex
+from main import NoUrlsFoundError, process_latex
 
 STATIC_DIR = Path(__file__).parent / "static"
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(5 * 1024 * 1024)))
@@ -59,7 +59,7 @@ async def process_tex_file(file: UploadFile = File(...)):
             status_code=502,
             detail=(
                 "Could not generate any citations. "
-                "Check your network connection and API keys, or set USE_MOCK=true in .env."
+                "Check your network connection and set SERPER_API_KEY in the environment."
             ),
         )
 

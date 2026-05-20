@@ -54,18 +54,12 @@ def retrieve_metadata(url: str) -> dict:
         msg = fetch_crossref(doi)
         if msg:
             print("Crossref metadata found for ", url)
-            year = None
-            for date_field in ("published-print", "published-online", "created", "issued"):
-                parts = (msg.get(date_field) or {}).get("date-parts")
-                if parts and parts[0] and parts[0][0]:
-                    year = parts[0][0]
-                    break
-
             return {
                 "title": msg.get("title", [""])[0] if msg.get("title") else "",
                 "author": [f"{a.get('given','')} {a.get('family','')}".strip()
                            for a in msg.get("author", [])],
-                "year": year,
+                "year": msg.get("published-print", msg.get("published-online", {}))
+                           .get("date-parts", [[None]])[0][0],
                 "doi": doi,
                 "URL": url,
                 "type": "article",

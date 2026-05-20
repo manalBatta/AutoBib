@@ -1,10 +1,6 @@
 # services/LLM_formatter.py
-import json
-import openai
 import re
-from config.settings import OPENAI_API_KEY, OPENAI_MODEL
-
-openai.api_key = OPENAI_API_KEY
+from utils.serper import enrich_metadata
 
 
 def _slugify(text: str, max_len: int = 10) -> str:
@@ -49,12 +45,11 @@ def generate_bibtex_key(metadata: dict, suffix: str = "") -> str:
 def format_as_bibtex(
     metadata: dict,
     style: str = "bibtex",
-    model: str = OPENAI_MODEL,
     use_mock: bool = True,
     key_suffix: str = ""
 ) -> str:
     """
-    Format metadata dict as a BibTeX entry using OpenAI LLM.
+    Format metadata dict as a BibTeX entry (Serper enriches metadata when use_mock=False).
     Enhanced to handle different entry types appropriately.
     Only includes non-empty fields for professional appearance.
     """
@@ -79,107 +74,70 @@ def format_as_bibtex(
             return f"  {name}={{{value}}},\n"
         return ""
 
-    def build_entry(entry_type_label: str, fields: list[str]) -> str:
-        body = "".join(fields).rstrip(",\n")
-        if body:
-            return f"@{entry_type_label}{{{bibtex_key},\n{body}\n}}\n"
-        return f"@{entry_type_label}{{{bibtex_key}\n}}\n"
+    if not use_mock:
+        metadata = enrich_metadata(metadata)
 
-    if use_mock:
-        # Create enhanced mock BibTeX entries for different types with only non-empty fields
-        if entry_type == "book":
-            fields = [
-                format_field("title", metadata.get('title', '')),
-                format_field("author", ' and '.join(metadata.get('author', []))),
-                format_field("year", metadata.get('year', '')),
-                format_field("publisher", metadata.get('publisher', '')),
-                format_field("isbn", metadata.get('isbn', '')),
-                format_field("pages", metadata.get('pages', '')),
-                format_field("edition", metadata.get('edition', '')),
-                format_field("address", metadata.get('address', ''))
-            ]
-            return build_entry("book", fields)
-            
-        elif entry_type == "software":
-            fields = [
-                format_field("title", metadata.get('title', '')),
-                format_field("author", ' and '.join(metadata.get('author', []))),
-                format_field("year", metadata.get('year', '')),
-                format_field("publisher", metadata.get('publisher', 'GitHub')),
-                format_field("url", metadata.get('URL', '')),
-                format_field("version", metadata.get('version', '')),
-                format_field("license", metadata.get('license', '')),
-                format_field("language", metadata.get('language', ''))
-            ]
-            return build_entry("software", fields)
-            
-        elif entry_type == "techreport":
-            fields = [
-                format_field("title", metadata.get('title', '')),
-                format_field("author", ' and '.join(metadata.get('author', []))),
-                format_field("year", metadata.get('year', '')),
-                format_field("institution", metadata.get('publisher', '')),
-                format_field("number", metadata.get('number', '')),
-                format_field("type", metadata.get('type', '')),
-                format_field("url", metadata.get('URL', ''))
-            ]
-            return build_entry("techreport", fields)
-            
-        elif entry_type == "misc":
-            fields = [
-                format_field("title", metadata.get('title', '')),
-                format_field("author", ' and '.join(metadata.get('author', []))),
-                format_field("year", metadata.get('year', '')),
-                format_field("howpublished", metadata.get('publisher', '')),
-                format_field("url", metadata.get('URL', '')),
-                format_field("version", metadata.get('version', '')),
-                format_field("note", metadata.get('description', ''))
-            ]
-            return build_entry("misc", fields)
-            
-        else:
-            # Enhanced article format with all available fields
-            fields = [
-                format_field("title", metadata.get('title', '')),
-                format_field("author", ' and '.join(metadata.get('author', []))),
-                format_field("year", metadata.get('year', '')),
-                format_field("journal", metadata.get('container-title', '')),
-                format_field("volume", metadata.get('volume', '')),
-                format_field("number", metadata.get('issue', '')),
-                format_field("pages", metadata.get('page', '')),
-                format_field("doi", metadata.get('doi', '')),
-                format_field("url", metadata.get('URL', ''))
-            ]
-            return build_entry(bibtex_entry_type, fields)
+    # Build BibTeX from metadata fields
+    if entry_type == "book":
+        fields = [
+            format_field("title", metadata.get('title', '')),
+            format_field("author", ' and '.join(metadata.get('author', []))),
+            format_field("year", metadata.get('year', '')),
+            format_field("publisher", metadata.get('publisher', '')),
+            format_field("isbn", metadata.get('isbn', '')),
+            format_field("pages", metadata.get('pages', '')),
+            format_field("edition", metadata.get('edition', '')),
+            format_field("address", metadata.get('address', ''))
+        ]
+        return "@book{" + bibtex_key + ",\n" + ''.join(fields)
 
-    # Enhanced LLM prompt for better formatting
-    prompt = f"""You are a citation formatter.
-Output a single BibTeX entry of type @{bibtex_entry_type}.
-Use the citation key: {bibtex_key}.
-Include ALL available non-empty fields from the metadata.
-OMIT fields that are empty, null, or "None".
-Use proper BibTeX field names for the entry type.
+    elif entry_type == "software":
+        fields = [
+            format_field("title", metadata.get('title', '')),
+            format_field("author", ' and '.join(metadata.get('author', []))),
+            format_field("year", metadata.get('year', '')),
+            format_field("publisher", metadata.get('publisher', 'GitHub')),
+            format_field("url", metadata.get('URL', '')),
+            format_field("version", metadata.get('version', '')),
+            format_field("license", metadata.get('license', '')),
+            format_field("language", metadata.get('language', ''))
+        ]
+        return "@software{" + bibtex_key + ",\n" + ''.join(fields)
 
-Entry type guidelines with ALL possible fields:
-- @book: title, author, year, publisher, isbn, pages, edition, address, series
-- @software: title, author, year, publisher, url, version, license, language
-- @techreport: title, author, year, institution, number, type, url, address
-- @misc: title, author, year, howpublished, url, version, note, address
-- @article: title, author, year, journal, volume, number, pages, doi, url
-- @inproceedings: title, author, year, booktitle, pages, publisher, address, doi, url
+    elif entry_type == "techreport":
+        fields = [
+            format_field("title", metadata.get('title', '')),
+            format_field("author", ' and '.join(metadata.get('author', []))),
+            format_field("year", metadata.get('year', '')),
+            format_field("institution", metadata.get('publisher', '')),
+            format_field("number", metadata.get('number', '')),
+            format_field("type", metadata.get('type', '')),
+            format_field("url", metadata.get('URL', ''))
+        ]
+        return "@techreport{" + bibtex_key + ",\n" + ''.join(fields)
 
-Format each field properly: field={{value}}. Only include fields that have non-empty values.
+    elif entry_type == "misc":
+        fields = [
+            format_field("title", metadata.get('title', '')),
+            format_field("author", ' and '.join(metadata.get('author', []))),
+            format_field("year", metadata.get('year', '')),
+            format_field("howpublished", metadata.get('publisher', '')),
+            format_field("url", metadata.get('URL', '')),
+            format_field("version", metadata.get('version', '')),
+            format_field("note", metadata.get('description', ''))
+        ]
+        return "@misc{" + bibtex_key + ",\n" + ''.join(fields)
 
-Metadata:
-```json
-{json.dumps(metadata, indent=2)}
-```"""
-
-    response = openai.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0,
-        max_tokens=300,
-    )
-
-    return response.choices[0].message.content.strip()
+    else:
+        fields = [
+            format_field("title", metadata.get('title', '')),
+            format_field("author", ' and '.join(metadata.get('author', []))),
+            format_field("year", metadata.get('year', '')),
+            format_field("journal", metadata.get('container-title', '')),
+            format_field("volume", metadata.get('volume', '')),
+            format_field("number", metadata.get('issue', '')),
+            format_field("pages", metadata.get('page', '')),
+            format_field("doi", metadata.get('doi', '')),
+            format_field("url", metadata.get('URL', ''))
+        ]
+        return "@" + bibtex_entry_type + "{" + bibtex_key + ",\n" + ''.join(fields)
