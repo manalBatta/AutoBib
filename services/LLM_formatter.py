@@ -79,6 +79,12 @@ def format_as_bibtex(
             return f"  {name}={{{value}}},\n"
         return ""
 
+    def build_entry(entry_type_label: str, fields: list[str]) -> str:
+        body = "".join(fields).rstrip(",\n")
+        if body:
+            return f"@{entry_type_label}{{{bibtex_key},\n{body}\n}}\n"
+        return f"@{entry_type_label}{{{bibtex_key}\n}}\n"
+
     if use_mock:
         # Create enhanced mock BibTeX entries for different types with only non-empty fields
         if entry_type == "book":
@@ -92,7 +98,7 @@ def format_as_bibtex(
                 format_field("edition", metadata.get('edition', '')),
                 format_field("address", metadata.get('address', ''))
             ]
-            return "@book{" + bibtex_key + ",\n" + ''.join(fields)
+            return build_entry("book", fields)
             
         elif entry_type == "software":
             fields = [
@@ -105,7 +111,7 @@ def format_as_bibtex(
                 format_field("license", metadata.get('license', '')),
                 format_field("language", metadata.get('language', ''))
             ]
-            return "@software{" + bibtex_key + ",\n" + ''.join(fields)
+            return build_entry("software", fields)
             
         elif entry_type == "techreport":
             fields = [
@@ -117,7 +123,7 @@ def format_as_bibtex(
                 format_field("type", metadata.get('type', '')),
                 format_field("url", metadata.get('URL', ''))
             ]
-            return "@techreport{" + bibtex_key + ",\n" + ''.join(fields)
+            return build_entry("techreport", fields)
             
         elif entry_type == "misc":
             fields = [
@@ -129,7 +135,7 @@ def format_as_bibtex(
                 format_field("version", metadata.get('version', '')),
                 format_field("note", metadata.get('description', ''))
             ]
-            return "@misc{" + bibtex_key + ",\n" + ''.join(fields)
+            return build_entry("misc", fields)
             
         else:
             # Enhanced article format with all available fields
@@ -144,7 +150,7 @@ def format_as_bibtex(
                 format_field("doi", metadata.get('doi', '')),
                 format_field("url", metadata.get('URL', ''))
             ]
-            return "@" + bibtex_entry_type + "{" + bibtex_key + ",\n" + ''.join(fields)
+            return build_entry(bibtex_entry_type, fields)
 
     # Enhanced LLM prompt for better formatting
     prompt = f"""You are a citation formatter.
