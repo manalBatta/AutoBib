@@ -12,11 +12,15 @@ def fetch_arxiv(arxiv_id: str, max_retries: int = 3) -> dict | None:
 
     for attempt in range(max_retries):
         try:
-            r = requests.get(url, headers=headers, timeout=30)
+            print(f"[arxiv] Attempt {attempt + 1}/{max_retries} id={arxiv_id} url={url}")
+            r = requests.get(url, headers=headers, timeout=50)
             if r.status_code == 429:
+                wait_sec = 2 ** attempt
+                print(f"[arxiv] Rate limited (429) for id={arxiv_id}. Retrying in {wait_sec}s")
                 time.sleep(2 ** attempt)
                 continue
             if r.status_code != 200:
+                print(f"[arxiv] Non-200 status={r.status_code} for id={arxiv_id} response={r.text[:300]}")
                 return None
 
             feed = feedparser.parse(r.text)
@@ -31,10 +35,16 @@ def fetch_arxiv(arxiv_id: str, max_retries: int = 3) -> dict | None:
                     "type": "article",
                     "container-title": "arXiv preprint",
                 }
+            print(
+                f"[arxiv] Parsed feed but no entries for id={arxiv_id}. "
+                f"bozo={getattr(feed, 'bozo', None)} snippet={r.text[:300]}"
+            )
             return None
-        except requests.RequestException:
+        except requests.RequestException as exc:
+            print(f"[arxiv] Request exception for id={arxiv_id} attempt={attempt + 1}: {exc}")
             if attempt + 1 < max_retries:
                 time.sleep(2 ** attempt)
             continue
 
+    print(f"[arxiv] Exhausted retries for id={arxiv_id}")
     return None
